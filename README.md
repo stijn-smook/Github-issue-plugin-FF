@@ -2,7 +2,8 @@
 
 A Chrome extension to quickly create GitHub issues with page context and screenshots.
 
-![Quick Issue Main Interface](images/popup.png)
+<img width="401" height="557" alt="image" src="https://github.com/user-attachments/assets/e1882baa-1f7c-41c3-b026-137424027a3e" />
+
 
 ## Features
 
