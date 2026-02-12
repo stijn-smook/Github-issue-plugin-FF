@@ -1,0 +1,15 @@
+{
+	"manifest_version": 3,
+	"name": "Slide Editor Quick Issue",
+	"version": "1.0.0",
+	"description": "Quickly create GitHub issues for Slide Editor with page context",
+	"permissions": ["activeTab", "storage", "scripting"],
+	"host_permissions": [
+		"https://api.github.com/*",
+		"https://api.imgur.com/*",
+		"<all_urls>"
+	],
+	"action": {
+		"default_popup": "popup.html"
+	}
+}
