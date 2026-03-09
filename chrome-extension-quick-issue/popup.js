@@ -1,3 +1,5 @@
+const ext = typeof browser !== "undefined" ? browser : chrome;
+
 // Configuration - loaded from storage
 let REPO_OWNER = '';
 let REPO_NAME = '';
@@ -29,7 +31,7 @@ let screenshotDataUrl = null;
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   // Load saved settings and token
-  const stored = await chrome.storage.local.get(['githubToken', 'repoOwner', 'repoName', 'projectId', 'draftBody', 'draftType', 'draftScreenshot', 'draftIncludeContext']);
+  const stored = await ext.storage.local.get(['githubToken', 'repoOwner', 'repoName', 'projectId', 'draftBody', 'draftType', 'draftScreenshot', 'draftIncludeContext']);
   
   // Load repo configuration
   if (stored.repoOwner) {
@@ -76,23 +78,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   
   // Get current tab info
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const [tab] = await ext.tabs.query({ active: true, currentWindow: true });
   currentTab = tab;
   
   pageTitle.textContent = tab.title || 'Unknown';
   pageUrl.textContent = tab.url || 'Unknown';
   
   // Check for pending screenshot from region selection
-  const screenshotStored = await chrome.storage.local.get(['pendingScreenshot']);
+  const screenshotStored = await ext.storage.local.get(['pendingScreenshot']);
   if (screenshotStored.pendingScreenshot) {
     setScreenshot(screenshotStored.pendingScreenshot);
-    chrome.storage.local.remove('pendingScreenshot');
+    ext.storage.local.remove('pendingScreenshot');
   }
   
   // Get selected text if any (only if no draft)
   if (!stored.draftBody) {
     try {
-      const [result] = await chrome.scripting.executeScript({
+      const [result] = await ext.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => window.getSelection().toString()
       });
@@ -103,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveDraft();
       }
     } catch (_e) {
-      // Can't access page content (e.g., chrome:// pages)
+      // Can't access page content (e.g., ext:// pages)
     }
   }
   
@@ -120,11 +122,11 @@ function saveDraft() {
   if (screenshotDataUrl) {
     draftData.draftScreenshot = screenshotDataUrl;
   }
-  chrome.storage.local.set(draftData);
+  ext.storage.local.set(draftData);
 }
 
 function clearDraft() {
-  chrome.storage.local.remove(['draftBody', 'draftType', 'draftScreenshot', 'draftIncludeContext']);
+  ext.storage.local.remove(['draftBody', 'draftType', 'draftScreenshot', 'draftIncludeContext']);
 }
 
 // Save on input changes
@@ -150,7 +152,7 @@ function saveSettings() {
     REPO_OWNER = repoOwnerInput.value.trim();
     REPO_NAME = repoNameInput.value.trim();
     PROJECT_ID = projectIdInput.value.trim();
-    await chrome.storage.local.set({
+    await ext.storage.local.set({
       githubToken: tokenInput.value,
       repoOwner: REPO_OWNER,
       repoName: REPO_NAME,
@@ -322,7 +324,7 @@ captureTabBtn.addEventListener('click', async () => {
     captureTabBtn.textContent = 'Capturing...';
     
     // Capture visible tab
-    const dataUrl = await chrome.tabs.captureVisibleTab(null, { format: 'png' });
+    const dataUrl = await ext.tabs.captureVisibleTab(null, { format: 'png' });
     setScreenshot(dataUrl);
   } catch (error) {
     showStatus(`Screenshot failed: ${error.message}`, 'error');
@@ -338,7 +340,7 @@ selectRegionBtn.addEventListener('click', async () => {
     selectRegionBtn.textContent = 'Capturing...';
     
     // Capture full tab first
-    const fullScreenshot = await chrome.tabs.captureVisibleTab(null, { format: 'png' });
+    const fullScreenshot = await ext.tabs.captureVisibleTab(null, { format: 'png' });
     
     // Show crop UI in popup
     showCropUI(fullScreenshot);
@@ -515,7 +517,7 @@ removeScreenshotBtn.addEventListener('click', () => {
   screenshotDataUrl = null;
   screenshotImg.src = '';
   screenshotPreview.classList.remove('visible');
-  chrome.storage.local.remove(['pendingScreenshot', 'draftScreenshot']);
+  ext.storage.local.remove(['pendingScreenshot', 'draftScreenshot']);
 });
 
 function setScreenshot(dataUrl) {
